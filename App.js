@@ -40,14 +40,21 @@ export default function App() {
             let iconName;
             let iconColor;
 
-            if (route.name === 'Home') {
+            if (route.name === 'Accueil') {
               iconName = focused ? 'home' : 'home-outline';
               iconColor = focused ? '#D9D9D9' : 'white';
             } else if (route.name === 'Record') {
               iconName = focused ? 'mic' : 'mic-outline';
               iconColor = focused ? '#D9D9D9' : 'white';
-
+            } else if (route.name === 'Liste records') {
+              iconName = focused ? 'musical-note' : 'musical-note-outline';
+              iconColor = focused ? '#D9D9D9' : 'white';
             }
+            else if (route.name === 'SendToServer') {
+              iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
+              iconColor = focused ? '#D9D9D9' : 'white';
+            }
+
 
             // Return the Ionicons component with the appropriate icon name
             return <Ionicons name={iconName} size={size} color={iconColor} />;
@@ -59,10 +66,9 @@ export default function App() {
           }, 
         })}
       >
-
-        <tab.Screen name='Home' component={Home}/>
+        <tab.Screen name='Accueil' component={Home}/>
         <tab.Screen name='Record' component={Record}/>
-        <tab.Screen name='RecordList' component={RecordList}/>
+        <tab.Screen name='Liste records' component={RecordList}/>
         <tab.Screen name='SendToServer' component={SendToServer}/>
       </tab.Navigator>
     </NavigationContainer>

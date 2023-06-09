@@ -4,13 +4,14 @@ import { Image } from 'react-native';
 import { useEffect, useState } from 'react';
 import { Audio } from 'expo-av';
 import { useNavigation } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
 
 
 const Record = ({ route}) => {
     // const [isRecord, setIsRecord] = useState(false);
     const [isStart, setIsStart] = useState(false);
     // const [isPlay, setIsPlay] = useState(false);
-  
+    
     // prend en paramètre un tableau pour y stocker les enregistrement
     const [recording, setRecording] = useState();
     const [recordings, setRecordings] = useState([]);
@@ -29,27 +30,6 @@ const Record = ({ route}) => {
 
     const [isRecordingFinished, setIsRecordingFinished] = useState(false);
 
-
-    const handleIsStart = () => {
-        setIsStart(true);
-    }
-
-    const handleIsEnd = () => {
-        setIsStart(false);
-        // setIsPlay(true);
-    }
-
-    const handlePlay = () => {
-        setIsPlay(true);
-    }
-
-    const handlePauseRecord = () => {
-        setIsPlay(false);
-    }
-
-    const handlePlayRecord = () => {
-        setIsPlay(true);
-    }
 
     useEffect(() => {
         if (soundObject) {
@@ -168,13 +148,35 @@ const Record = ({ route}) => {
    }
    
    //Fonction pour sauvegarder l'enregistrement dans une liste de sauvegarde qu'on envoie vers la 3e tab pour les afficher
-    const saveRecording = () => {
+    const saveRecording = async () => {
+      try {
         const uri = recording.getURI();
+
+        const fileName = 'audio.wav'; // Nom du fichier d'enregistrement
+        //const directory = `${FileSystem.documentDirectory}recordings/`; // Chemin du dossier de sauvegarde
+        const directory = FileSystem.documentDirectory + "my_directory";
+
+        // Créer le dossier s'il n'existe pas
+        await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
+
+        // Copier le fichier d'enregistrement dans le dossier de sauvegarde
+        const savedFileUri = `${directory}${fileName}`;
+        await FileSystem.copyAsync({ from: uri, to: savedFileUri });
+
         const updatedRecordings = [...recordingsSave, uri]; // Ajoute le nouvel enregistrement à la liste des enregistrements sauvegardés
         setRecordingsSave(updatedRecordings);
-        console.log('LES ENREGISTREMENTS SAUVEGARDES', updatedRecordings);
-        navigation.navigate('RecordList', { recordings: updatedRecordings });
+        
+        //console.log('LES ENREGISTREMENTS SAUVEGARDES', updatedRecordings);
+
+        setIsRecordingFinished(false); // Enregistrement terminé 
+
+        navigation.navigate('Liste records', { recordings: updatedRecordings });
         setRecordingsSave([]);
+
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde de l\'enregistrement:', error);
+      }
+        //console.log('LES ENREGISTREMENTS SAUVEGARDES', updatedRecordings);
     };
   
 
@@ -202,7 +204,7 @@ const Record = ({ route}) => {
                 setIsPlaying(true);
               } else {
                 if (isPlaying) {
-                  // Si la lecture est en cours, mettez l'audio en pause
+                  // Si la lecture est en cours, mettre l'audio en pause
                   await soundObject.pauseAsync();
                   setIsPlaying(false);
                 } else {
@@ -229,23 +231,23 @@ const Record = ({ route}) => {
     
 
             <Image
-                source={require('../assets/rave.png')} // ou {uri: 'https://example.com/image.png'} pour une image à partir d'une URL
+                source={require('../assets/rave.png')} 
                 style={{marginBottom: 10}}
             />
 
             {
-            isStart && 
+            isRecording  && 
                 <Image
-                    source={require('../assets/voice-recorder.png')} // ou {uri: 'https://example.com/image.png'} pour une image à partir d'une URL
-                    style={{ width: 185, height: 185 }} // Définissez les dimensions de l'image selon vos besoins
+                    source={require('../assets/voice-recorder.png')} 
+                    style={{ width: 185, height: 185 }} 
                 />
             }
 
             {
-            !isStart && 
+            !isRecording  && 
             <Image
-                source={require('../assets/record.png')} // ou {uri: 'https://example.com/image.png'} pour une image à partir d'une URL
-                style={{ width: 185, height: 185 }} // Définissez les dimensions de l'image selon vos besoins
+                source={require('../assets/record.png')} 
+                style={{ width: 185, height: 185 }}
                 />
             }
 
